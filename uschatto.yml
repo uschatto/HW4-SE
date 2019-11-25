@@ -1,0 +1,60 @@
+---
+- hosts: all
+
+  tasks:
+   - name: Initial setup for nodejs
+     shell: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+
+   - name: Setup to Install nodejs and npm
+     apt:
+      name: nodejs
+      state: latest
+      allow_unauthenticated: yes
+     become: yes
+
+   - name: Setup to Install forever
+     shell: npm install -g forever
+     become: yes
+     become_method: sudo
+
+   - name: Setup to Install git to pull/clone in the following task
+     apt:
+      name: git
+      state: latest
+     become: yes
+
+   - name: Setup to Pull/clone git repo into a destination
+     git:
+      repo: https://github.com/CSC-DevOps/App
+      dest: /home/HW5
+      clone: yes
+     become: yes
+
+   - name: Setup to Install npm packages using npm install command
+     npm:
+      path: /home/HW5
+     become: yes
+
+   - name: Task to run app
+     command: forever start /home/HW5/main.js start 4394
+     become: yes
+
+   - name: Task to ensure Security applications are running on latest versions
+     apt:
+      name: '{{ item }}'
+      state: latest
+     with_items:
+       - ssh
+       - openssl
+       - openssh-client
+       - openssh-server
+     become: yes
+
+   - name: Task to cleanup
+     become: yes
+     file:
+      state: "{{ item }}"
+      path: "/tmp/"
+     with_items:
+      - absent
+      - directory
