@@ -44,7 +44,7 @@
       name: '{{ item }}'
       state: latest
      with_items:
-       - ssh
+       - bash
        - openssl
        - openssh-client
        - openssh-server
